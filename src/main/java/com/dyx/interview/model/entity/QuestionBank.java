@@ -6,10 +6,7 @@ import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
-/**
- * 题库
- * @TableName question_bank
- */
+
 @TableName(value ="question_bank")
 @Data
 public class QuestionBank implements Serializable {

@@ -24,6 +24,7 @@ import com.dyx.interview.model.entity.User;
 import com.dyx.interview.model.vo.LoginUserVO;
 import com.dyx.interview.model.vo.UserVO;
 import com.dyx.interview.service.UserService;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
@@ -333,10 +334,10 @@ public class UserController {
      * @return 签到记录映射
      */
     @GetMapping("/get/sign_in")
-    public BaseResponse<Map<LocalDate, Boolean>> getUserSignInRecord(Integer year, HttpServletRequest request) {
+    public BaseResponse<List<Integer>> getUserSignInRecord(Integer year, HttpServletRequest request) {
         // 必须要登录才能获取
         User loginUser = userService.getLoginUser(request);
-        Map<LocalDate, Boolean> userSignInRecord = userService.getUserSignInRecord(loginUser.getId(), year);
+        List<Integer> userSignInRecord = userService.getUserSignInRecord(loginUser.getId(), year);
         return ResultUtils.success(userSignInRecord);
     }
 
