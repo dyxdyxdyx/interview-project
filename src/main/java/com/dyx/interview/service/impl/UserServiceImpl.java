@@ -4,12 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import com.dyx.interview.constant.CommonConstant;
+import com.dyx.interview.constant.RedisConstant;
 import com.dyx.interview.constant.UserConstant;
 import com.dyx.interview.exception.BusinessException;
 import com.dyx.interview.exception.ErrorCode;
@@ -21,9 +24,12 @@ import com.dyx.interview.model.vo.LoginUserVO;
 import com.dyx.interview.model.vo.UserVO;
 import com.dyx.interview.service.UserService;
 import com.dyx.interview.utils.SqlUtils;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBitSet;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -42,6 +48,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     public static final String SALT = "dyx";
+
+
+    @Resource
+    private RedissonClient redissonClient;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -270,4 +280,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 sortField);
         return queryWrapper;
     }
+
+    /**
+     * 添加用户签到记录
+     *
+     * @param userId 用户 id
+     * @return 当前是否已签到成功
+     */
+    @Override
+    public boolean addUserSignIn(long userId) {
+        LocalDate date = LocalDate.now();
+        String key = RedisConstant.getUserSignInRedisKey(date, userId);
+        RBitSet signInBitSet = redissonClient.getBitSet(key);
+        int offset = date.getDayOfYear();
+        if (!signInBitSet.get(offset)) {
+            return signInBitSet.set(offset,true);
+        }
+        return true;
+    }
+
+    /**
+     * 获取用户某个年份的签到记录
+     *
+     * @param userId 用户 id
+     * @param year   年份（为空表示当前年份）
+     * @return 签到记录映射
+     */
+    @Override
+    public List<Integer> getUserSignInRecord(long userId, Integer year) {
+        if (year == null) {
+            LocalDate date = LocalDate.now();
+            year=date.getYear();
+        }
+        String key = RedisConstant.getUserSignInRedisKey(LocalDate.ofEpochDay(year), userId);
+        RBitSet signInBitSet = redissonClient.getBitSet(key);
+        //加载bitset到内存中
+        BitSet bitSet = signInBitSet.asBitSet();
+        //统计签到的日期
+        ArrayList<Integer> dayList = new ArrayList<>();
+
+
+        //保证有序
+        //LinkedHashMap<LocalDate, Boolean> result = new LinkedHashMap<>();
+        //获取当前年份的总天数
+       // int totalDays = Year.of(year).length();
+//        for (int dayOfYear = 1; dayOfYear <= totalDays; dayOfYear++) {
+//            //获取value
+//            boolean hasRecord = bitSet.get(dayOfYear);
+//            if (hasRecord) {
+//                dayList.add(dayOfYear);
+//            }
+//        }
+
+        int index = bitSet.nextSetBit(0);
+        while (index>=0) {
+            dayList.add(index);
+            index = bitSet.nextSetBit(index + 1);
+        }
+        return dayList;
+    }
+
 }
