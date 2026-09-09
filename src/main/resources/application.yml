@@ -21,6 +21,10 @@ spring:
     port: 6379
     timeout: 2000
     password:
+  elasticsearch:
+    uris: http://localhost:9200
+    username: root
+    password: 123456
 
 mybatis-plus:
   configuration:
