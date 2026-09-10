@@ -22,6 +22,7 @@ import com.dyx.interview.model.vo.QuestionBankVO;
 import com.dyx.interview.service.QuestionBankService;
 import com.dyx.interview.service.QuestionService;
 import com.dyx.interview.service.UserService;
+import com.jd.platform.hotkey.client.callback.JdHotKeyStore;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -138,6 +139,17 @@ public class QuestionBankController {
     public BaseResponse<QuestionBankVO> getQuestionBankVOById(QuestionBankQueryRequest questionBankQueryRequest, HttpServletRequest request) {
         ThrowUtils.throwif(questionBankQueryRequest == null, ErrorCode.PARAMS_ERROR);
         Long id = questionBankQueryRequest.getId();
+        // 生成 key
+        String key = "bank_detail_" + id;
+        // 如果是热 key
+        if (JdHotKeyStore.isHotKey(key)) {
+            // 从本地缓存中获取缓存值
+            Object cachedQuestionBankVO = JdHotKeyStore.get(key);
+            if (cachedQuestionBankVO != null) {
+                // 如果缓存中有值，直接返回缓存的值
+                return ResultUtils.success((QuestionBankVO) cachedQuestionBankVO);
+            }
+        }
         ThrowUtils.throwif(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         QuestionBank questionBank = questionBankService.getById(id);
@@ -152,9 +164,19 @@ public class QuestionBankController {
             Page<Question> questionPage = questionService.listQuestionByPage(questionQueryRequest);
             questionBankVO.setQuestionPage(questionPage);
         }
+        // 设置本地缓存
+        JdHotKeyStore.smartSet(key, questionBankVO);
+
+
         // 获取封装类
         return ResultUtils.success(questionBankVO);
     }
+
+
+
+
+
+
 
     /**
      * 分页获取题库列表（仅管理员可用）

@@ -1,26 +1,35 @@
 package com.dyx.interview.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.dyx.interview.constant.CommonConstant;
+import com.dyx.interview.exception.BusinessException;
 import com.dyx.interview.exception.ErrorCode;
 import com.dyx.interview.exception.ThrowUtils;
 import com.dyx.interview.mapper.QuestionBankMapper;
 import com.dyx.interview.model.dto.questionBank.QuestionBankQueryRequest;
+import com.dyx.interview.model.entity.Question;
 import com.dyx.interview.model.entity.QuestionBank;
+import com.dyx.interview.model.entity.QuestionBankQuestion;
 import com.dyx.interview.model.entity.User;
 import com.dyx.interview.model.vo.QuestionBankVO;
 import com.dyx.interview.model.vo.UserVO;
+import com.dyx.interview.service.QuestionBankQuestionService;
 import com.dyx.interview.service.QuestionBankService;
+import com.dyx.interview.service.QuestionService;
 import com.dyx.interview.service.UserService;
 import com.dyx.interview.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -36,7 +45,8 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
 
     @Resource
     private UserService userService;
-
+    @Resource
+    private QuestionBankQuestionService questionBankQuestionService;
     /**
      * 校验数据
      *
@@ -170,5 +180,11 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
         questionBankVOPage.setRecords(questionBankVOList);
         return questionBankVOPage;
     }
+
+
+
+
+
+
 
 }

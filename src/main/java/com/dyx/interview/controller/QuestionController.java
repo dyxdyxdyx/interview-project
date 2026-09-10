@@ -15,9 +15,12 @@ import com.dyx.interview.model.dto.question.QuestionAddRequest;
 import com.dyx.interview.model.dto.question.QuestionEditRequest;
 import com.dyx.interview.model.dto.question.QuestionQueryRequest;
 import com.dyx.interview.model.dto.question.QuestionUpdateRequest;
+import com.dyx.interview.model.dto.questionBank.QuestionBankQuestionBatchAddRequest;
 import com.dyx.interview.model.entity.Question;
+import com.dyx.interview.model.entity.QuestionBankQuestion;
 import com.dyx.interview.model.entity.User;
 import com.dyx.interview.model.vo.QuestionVO;
+import com.dyx.interview.service.QuestionBankQuestionService;
 import com.dyx.interview.service.QuestionService;
 import com.dyx.interview.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -246,5 +249,21 @@ public class QuestionController {
         return ResultUtils.success(questionService.getQuestionVOPage(questionPage, request));
     }
 
-    // endregion
+    @Resource
+    private QuestionBankQuestionService questionBankQuestionService;
+    @PostMapping("/add/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> batchAddQuestionsToBank(
+            @RequestBody QuestionBankQuestionBatchAddRequest questionBankQuestionBatchAddRequest,
+            HttpServletRequest request
+    ) {
+        // 参数校验
+        ThrowUtils.throwif(questionBankQuestionBatchAddRequest == null, ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        Long questionBankId = questionBankQuestionBatchAddRequest.getQuestionBankId();
+        List<Long> questionIdList = questionBankQuestionBatchAddRequest.getQuestionIdList();
+        questionBankQuestionService.barchAddQuestionsToBank(questionIdList, questionBankId, loginUser);
+        return ResultUtils.success(true);
+    }
+
 }

@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dyx.interview.model.dto.questionBank.QuestionBankQueryRequest;
 import com.dyx.interview.model.entity.QuestionBank;
+import com.dyx.interview.model.entity.User;
 import com.dyx.interview.model.vo.QuestionBankVO;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 public interface QuestionBankService extends IService<QuestionBank> {
@@ -45,5 +47,8 @@ public interface QuestionBankService extends IService<QuestionBank> {
      * @return
      */
     Page<QuestionBankVO> getQuestionBankVOPage(Page<QuestionBank> questionBankPage, HttpServletRequest request);
+
+
+
 
 }

@@ -25,6 +25,16 @@ spring:
     uris: http://localhost:9200
     username: root
     password: 123456
+etcd:
+  server: ${etcdServer:http://127.0.0.1:2379}
+
+
+# 热 key 探测
+hotkey:
+  app-name: mianshiya
+  caffeine-size: 10000
+  push-period: 1000
+  etcd-server: http://localhost:2379
 
 mybatis-plus:
   configuration:

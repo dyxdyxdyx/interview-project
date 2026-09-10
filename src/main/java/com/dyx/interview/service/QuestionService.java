@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.dyx.interview.model.dto.question.QuestionQueryRequest;
 import com.dyx.interview.model.entity.Question;
+import com.dyx.interview.model.entity.User;
 import com.dyx.interview.model.vo.QuestionVO;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 public interface QuestionService extends IService<Question> {
@@ -64,5 +66,10 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     Page<Question> searchFromEs(QuestionQueryRequest questionQueryRequest);
+
+
+
+    public void batchDeleteQuestions(List<Long> questionIdList);
+
 
 }
